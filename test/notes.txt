@@ -1,0 +1,25 @@
+First: what this block is
+This is a Mocha test suite (Hardhat uses Mocha + Chai).
+Each it(...) means:
+“Assert that this specific thing is true after listing the property.
+
+Solidity → JavaScript translation
+Solidity:
+isListed[1]
+
+JavaScript (via ethers):
+escrow.isListed(1)
+
+
+🚨 This is critical:
+
+Public mappings become functions that take the key as an argument
+
+
+What beforeEach means
+
+Before every it(...) test inside Deposits:
+
+Run this code
+
+Set the blockchain state correctly
