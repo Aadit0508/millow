@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏠 Real Estate NFT DApp --made by me
+# 🏠 Real Estate NFT DApp
 
 ### Tokenize, Trade, and Own Virtual Properties on the Blockchain
 
