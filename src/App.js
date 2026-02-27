@@ -78,6 +78,18 @@ function App() {
     toggle?setToggle(false) : setToggle(true)
   }
 
+  if (typeof window.ethereum === 'undefined') {
+  return (
+    <div className='metamask-warning'>
+      <h1>MetaMask Required</h1>
+      <p>Please install MetaMask to use this application.</p>
+      <a href="https://metamask.io/download/" target="_blank" rel="noreferrer">
+        Install MetaMask
+      </a>
+    </div>
+  )
+}
+
   return (
     <div>
       <Navigation account={account} setAccount={setAccount} />
