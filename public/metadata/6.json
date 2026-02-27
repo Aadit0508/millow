@@ -1,0 +1,15 @@
+{
+    "name": "Austin Hill Country Ranch",
+    "address": "4200 Ranch Rd 620 N, Austin, TX 78734",
+    "description": "Expansive Texas ranch home with hill country views, outdoor entertainment area and guest house",
+    "image": "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800",
+    "id": "6",
+    "attributes": [
+        { "trait_type": "Purchase Price", "value": 18 },
+        { "trait_type": "Type of Residence", "value": "Single Family" },
+        { "trait_type": "Bed Rooms", "value": 5 },
+        { "trait_type": "Bathrooms", "value": 4 },
+        { "trait_type": "Square Feet", "value": 5200 },
+        { "trait_type": "Year Built", "value": 2010 }
+    ]
+}

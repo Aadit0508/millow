@@ -1,0 +1,15 @@
+{
+    "name": "Beverly Hills Modern Mansion",
+    "address": "750 Bel Air Rd, Los Angeles, CA 90077",
+    "description": "Sprawling modern mansion in the exclusive Bel Air neighborhood with infinity pool and city views",
+    "image": "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800",
+    "id": "4",
+    "attributes": [
+        { "trait_type": "Purchase Price", "value": 35 },
+        { "trait_type": "Type of Residence", "value": "Mansion" },
+        { "trait_type": "Bed Rooms", "value": 6 },
+        { "trait_type": "Bathrooms", "value": 7 },
+        { "trait_type": "Square Feet", "value": 8500 },
+        { "trait_type": "Year Built", "value": 2019 }
+    ]
+}
