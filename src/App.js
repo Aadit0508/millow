@@ -12,20 +12,23 @@ import Escrow from "./abis/Escrow.json";
 
 // Config
 import config from "./config.json";
+import MintProperty from "./components/MintProperty";
 
 function App() {
+  const [mintToggle, setMintToggle] = useState(false);
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
   const [escrow, setEscrow] = useState(null);
+  const [realEstate, setRealEstate] = useState(null);
   const [homes, setHomes] = useState([]);
-  const [home,setHome]=useState(null);
-  const[toggle,setToggle]=useState();
+  const [home, setHome] = useState(null);
+  const [toggle, setToggle] = useState();
+  const [isSeller, setIsSeller] = useState(false);
 
   const loadBlockChainData = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     setProvider(provider);
 
-    // to tell which network it should be connected to
     const network = await provider.getNetwork();
     console.log("Chain ID:", network.chainId);
 
@@ -37,11 +40,11 @@ function App() {
     console.log(await realEstate.name())
 
     const totalSupply = await realEstate.totalSupply();
-    const total=totalSupply.toNumber()
+    setRealEstate(realEstate);
+    const total = totalSupply.toNumber()
     console.log("Total Supply:", total)
 
     const homes = [];
-
     for (var i = 1; i <= total; i++) {
       const uri = await realEstate.tokenURI(i);
       const response = await fetch(uri);
@@ -58,7 +61,15 @@ function App() {
     );
     setEscrow(escrow);
 
-    // window.ethereum is the bridge between the website and the metamask
+    // Fix: get account directly instead of relying on state
+    const sellerAddress = await escrow.seller();
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    const connectedAccount = ethers.utils.getAddress(accounts[0]);
+    setAccount(connectedAccount);
+    if (ethers.utils.getAddress(connectedAccount) === ethers.utils.getAddress(sellerAddress)) {
+      setIsSeller(true);
+    }
+
     window.ethereum.on("accountsChanged", async () => {
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
@@ -70,25 +81,24 @@ function App() {
 
   useEffect(() => {
     loadBlockChainData();
-    // console.log(homes)
   }, []);
 
-  const togglePop=(home)=>{
+  const togglePop = (home) => {
     setHome(home)
-    toggle?setToggle(false) : setToggle(true)
+    toggle ? setToggle(false) : setToggle(true)
   }
 
   if (typeof window.ethereum === 'undefined') {
-  return (
-    <div className='metamask-warning'>
-      <h1>MetaMask Required</h1>
-      <p>Please install MetaMask to use this application.</p>
-      <a href="https://metamask.io/download/" target="_blank" rel="noreferrer">
-        Install MetaMask
-      </a>
-    </div>
-  )
-}
+    return (
+      <div className='metamask-warning'>
+        <h1>MetaMask Required</h1>
+        <p>Please install MetaMask to use this application.</p>
+        <a href="https://metamask.io/download/" target="_blank" rel="noreferrer">
+          Install MetaMask
+        </a>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -97,11 +107,10 @@ function App() {
 
       <div className="cards__section">
         <h3>Homes for You</h3>
-        <hr/>
+        <hr />
 
         <div className="cards">
-
-          {homes.map((home,index)=>(
+          {homes.map((home, index) => (
             <div className="card" key={index} onClick={() => togglePop(home)}>
               <div className="card__image">
                 <img src={home.image} alt="Home/"></img>
@@ -120,8 +129,24 @@ function App() {
         </div>
       </div>
 
+      {isSeller && (
+        <button className="mint-btn" onClick={() => setMintToggle(true)}>
+          + List New Property
+        </button>
+      )}
+
+      {mintToggle && (
+        <MintProperty
+          realEstate={realEstate}
+          escrow={escrow}
+          provider={provider}
+          account={account}
+          onClose={() => setMintToggle(false)}
+        />
+      )}
+
       {toggle && (
-        <Home home={home} provider={provider} account={account} escrow={escrow} togglePop={togglePop}/>
+        <Home home={home} provider={provider} account={account} escrow={escrow} togglePop={togglePop} />
       )}
     </div>
   );
