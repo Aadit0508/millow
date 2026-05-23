@@ -25,12 +25,59 @@ function App() {
   const [toggle, setToggle] = useState();
   const [isSeller, setIsSeller] = useState(false);
 
+  const syncSellerRole = async (escrowContract, selectedAccount) => {
+    if (!escrowContract || !selectedAccount) {
+      setIsSeller(false);
+      return;
+    }
+
+    const sellerAddress = await escrowContract.seller();
+    setIsSeller(
+      ethers.utils.getAddress(selectedAccount) ===
+        ethers.utils.getAddress(sellerAddress),
+    );
+  };
+
+  const loadHomes = async (realEstateContract) => {
+    const totalSupply = await realEstateContract.totalSupply();
+    const total = totalSupply.toNumber();
+    const loadedHomes = [];
+
+    for (let i = 1; i <= total; i++) {
+      try {
+        const uri = await realEstateContract.tokenURI(i);
+        const response = await fetch(uri);
+        const metadata = await response.json();
+
+        loadedHomes.push({
+          ...metadata,
+          id: metadata.id || String(i),
+        });
+      } catch (error) {
+        console.warn(`Unable to load metadata for token ${i}`, error);
+      }
+    }
+
+    setHomes(loadedHomes);
+  };
+
+  const refreshHomes = async () => {
+    if (!realEstate) return;
+    await loadHomes(realEstate);
+  };
+
   const loadBlockChainData = async () => {
+    if (typeof window.ethereum === "undefined") return;
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     setProvider(provider);
 
     const network = await provider.getNetwork();
     console.log("Chain ID:", network.chainId);
+
+    if (!config[network.chainId]) {
+      throw new Error(`No contract config found for chain ${network.chainId}`);
+    }
 
     const realEstate = new ethers.Contract(
       config[network.chainId].realEstate.address,
@@ -39,20 +86,8 @@ function App() {
     );
     console.log(await realEstate.name())
 
-    const totalSupply = await realEstate.totalSupply();
     setRealEstate(realEstate);
-    const total = totalSupply.toNumber()
-    console.log("Total Supply:", total)
-
-    const homes = [];
-    for (var i = 1; i <= total; i++) {
-      const uri = await realEstate.tokenURI(i);
-      const response = await fetch(uri);
-      const metadata = await response.json();
-      homes.push(metadata);
-    }
-    console.log("Homes array before set:", homes)
-    setHomes(homes);
+    await loadHomes(realEstate);
 
     const escrow = new ethers.Contract(
       config[network.chainId].escrow.address,
@@ -61,21 +96,21 @@ function App() {
     );
     setEscrow(escrow);
 
-    // Fix: get account directly instead of relying on state
-    const sellerAddress = await escrow.seller();
     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
     const connectedAccount = ethers.utils.getAddress(accounts[0]);
     setAccount(connectedAccount);
-    if (ethers.utils.getAddress(connectedAccount) === ethers.utils.getAddress(sellerAddress)) {
-      setIsSeller(true);
-    }
+    await syncSellerRole(escrow, connectedAccount);
 
-    window.ethereum.on("accountsChanged", async () => {
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      const account = ethers.utils.getAddress(accounts[0]);
-      setAccount(account);
+    window.ethereum.on("accountsChanged", async (accounts) => {
+      if (!accounts.length) {
+        setAccount(null);
+        setIsSeller(false);
+        return;
+      }
+
+      const selectedAccount = ethers.utils.getAddress(accounts[0]);
+      setAccount(selectedAccount);
+      await syncSellerRole(escrow, selectedAccount);
     });
   };
 
@@ -142,6 +177,7 @@ function App() {
           provider={provider}
           account={account}
           onClose={() => setMintToggle(false)}
+          onPropertyAdded={refreshHomes}
         />
       )}
 

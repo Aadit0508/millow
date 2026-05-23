@@ -1,4 +1,3 @@
-import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 
 import close from "../assets/close.svg";
@@ -97,14 +96,14 @@ const Home = ({ home, provider, account, escrow, togglePop }) => {
     await transaction.wait();
 
     // Calculate remaining amount (purchase price - deposit)
-    const lendAmount =
-      (await escrow.purchasePrice(home.id)) -
-      (await escrow.escrowAmount(home.id));
+    const purchasePrice = await escrow.purchasePrice(home.id);
+    const escrowAmount = await escrow.escrowAmount(home.id);
+    const lendAmount = purchasePrice.sub(escrowAmount);
 
     // Send funds to escrow contract
     await signer.sendTransaction({
       to: escrow.address,
-      value: lendAmount.toString(),
+      value: lendAmount,
       gasLimit: 60000,
     });
 

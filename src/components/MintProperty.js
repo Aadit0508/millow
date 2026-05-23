@@ -1,8 +1,15 @@
 import { useState } from "react";
 import { ethers } from "ethers";
 
-function MintProperty({ realEstate, escrow, provider, account, onClose }) {
-  const [form, setForm] = useState({
+function MintProperty({
+  realEstate,
+  escrow,
+  provider,
+  account,
+  onClose,
+  onPropertyAdded,
+}) {
+  const emptyForm = {
     name: "",
     address: "",
     description: "",
@@ -15,7 +22,9 @@ function MintProperty({ realEstate, escrow, provider, account, onClose }) {
     bathrooms: "",
     sqft: "",
     yearBuilt: "",
-  });
+  };
+
+  const [form, setForm] = useState(emptyForm);
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,9 +33,17 @@ function MintProperty({ realEstate, escrow, provider, account, onClose }) {
     setForm((prev) => ({ ...prev, [name]: files ? files[0] : value }));
   };
 
+  const parsePinataError = (data, fallback) => {
+    if (typeof data?.error === "string") return data.error;
+    if (data?.error?.details) return data.error.details;
+    if (data?.error?.reason) return data.error.reason;
+    return fallback;
+  };
+
   const uploadImageToPinata = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
+
     const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
       method: "POST",
       headers: {
@@ -35,7 +52,11 @@ function MintProperty({ realEstate, escrow, provider, account, onClose }) {
       body: formData,
     });
     const data = await res.json();
-    if (!data.IpfsHash) throw new Error("Image upload failed");
+
+    if (!res.ok || !data.IpfsHash) {
+      throw new Error(parsePinataError(data, "Image upload failed"));
+    }
+
     return `https://ipfs.io/ipfs/${data.IpfsHash}`;
   };
 
@@ -49,8 +70,38 @@ function MintProperty({ realEstate, escrow, provider, account, onClose }) {
       body: JSON.stringify(metadata),
     });
     const data = await res.json();
-    if (!data.IpfsHash) throw new Error("Metadata upload failed");
+
+    if (!res.ok || !data.IpfsHash) {
+      throw new Error(parsePinataError(data, "Metadata upload failed"));
+    }
+
     return `https://ipfs.io/ipfs/${data.IpfsHash}`;
+  };
+
+  const validateForm = () => {
+    if (!process.env.REACT_APP_PINATA_JWT) {
+      throw new Error("Missing REACT_APP_PINATA_JWT in your environment");
+    }
+
+    if (!provider || !realEstate || !escrow || !account) {
+      throw new Error("Connect the seller wallet before listing a property");
+    }
+
+    if (!form.image) {
+      throw new Error("Select a property image");
+    }
+
+    if (!ethers.utils.isAddress(form.buyerAddress)) {
+      throw new Error("Enter a valid buyer wallet address");
+    }
+
+    if (Number(form.purchasePrice) <= 0 || Number(form.escrowAmount) <= 0) {
+      throw new Error("Purchase price and escrow amount must be greater than zero");
+    }
+
+    if (Number(form.escrowAmount) > Number(form.purchasePrice)) {
+      throw new Error("Escrow amount cannot be greater than purchase price");
+    }
   };
 
   const handleMint = async (e) => {
@@ -59,9 +110,11 @@ function MintProperty({ realEstate, escrow, provider, account, onClose }) {
     setStatus("");
 
     try {
+      validateForm();
+
       const signer = provider.getSigner();
 
-      setStatus("📤 Uploading image to IPFS...");
+      setStatus("Uploading image to IPFS...");
       const imageUrl = await uploadImageToPinata(form.image);
 
       const totalSupply = await realEstate.totalSupply();
@@ -83,42 +136,36 @@ function MintProperty({ realEstate, escrow, provider, account, onClose }) {
         ],
       };
 
-      setStatus("📤 Uploading metadata to IPFS...");
+      setStatus("Uploading metadata to IPFS...");
       const tokenURI = await uploadMetadataToPinata(metadata);
 
-      setStatus("⛏️ Minting NFT...");
+      setStatus("Minting NFT...");
       const mintTx = await realEstate.connect(signer).mint(tokenURI);
       const mintReceipt = await mintTx.wait();
 
-      const transferEvent = mintReceipt.events.find((e) => e.event === "Transfer");
+      const transferEvent = mintReceipt.events.find((event) => event.event === "Transfer");
       const tokenId = transferEvent.args.tokenId.toNumber();
 
-      setStatus("✅ Approving escrow...");
+      setStatus("Approving escrow...");
       const approveTx = await realEstate.connect(signer).approve(escrow.address, tokenId);
       await approveTx.wait();
 
-      setStatus("🏠 Listing on escrow...");
+      setStatus("Listing on escrow...");
       const listTx = await escrow.connect(signer).list(
         tokenId,
-        form.buyerAddress,
+        ethers.utils.getAddress(form.buyerAddress),
         ethers.utils.parseUnits(form.purchasePrice.toString(), "ether"),
-        ethers.utils.parseUnits(form.escrowAmount.toString(), "ether")
+        ethers.utils.parseUnits(form.escrowAmount.toString(), "ether"),
       );
       await listTx.wait();
 
-      setStatus(`🎉 Done! Property minted as Token #${tokenId} and listed.`);
-      setLoading(false);
-
-      setForm({
-        name: "", address: "", description: "", image: null,
-        purchasePrice: "", escrowAmount: "", buyerAddress: "",
-        residenceType: "", bedrooms: "", bathrooms: "",
-        sqft: "", yearBuilt: "",
-      });
-
+      await onPropertyAdded?.();
+      setStatus(`Done. Property minted as Token #${tokenId} and listed.`);
+      setForm(emptyForm);
     } catch (err) {
       console.error(err);
-      setStatus("❌ Error: " + err.message);
+      setStatus("Error: " + err.message);
+    } finally {
       setLoading(false);
     }
   };
