@@ -12,22 +12,72 @@ import Escrow from "./abis/Escrow.json";
 
 // Config
 import config from "./config.json";
+import MintProperty from "./components/MintProperty";
 
 function App() {
+  const [mintToggle, setMintToggle] = useState(false);
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
   const [escrow, setEscrow] = useState(null);
+  const [realEstate, setRealEstate] = useState(null);
   const [homes, setHomes] = useState([]);
-  const [home,setHome]=useState(null);
-  const[toggle,setToggle]=useState();
+  const [home, setHome] = useState(null);
+  const [toggle, setToggle] = useState();
+  const [isSeller, setIsSeller] = useState(false);
+
+  const syncSellerRole = async (escrowContract, selectedAccount) => {
+    if (!escrowContract || !selectedAccount) {
+      setIsSeller(false);
+      return;
+    }
+
+    const sellerAddress = await escrowContract.seller();
+    setIsSeller(
+      ethers.utils.getAddress(selectedAccount) ===
+        ethers.utils.getAddress(sellerAddress),
+    );
+  };
+
+  const loadHomes = async (realEstateContract) => {
+    const totalSupply = await realEstateContract.totalSupply();
+    const total = totalSupply.toNumber();
+    const loadedHomes = [];
+
+    for (let i = 1; i <= total; i++) {
+      try {
+        const uri = await realEstateContract.tokenURI(i);
+        const response = await fetch(uri);
+        const metadata = await response.json();
+
+        loadedHomes.push({
+          ...metadata,
+          id: metadata.id || String(i),
+        });
+      } catch (error) {
+        console.warn(`Unable to load metadata for token ${i}`, error);
+      }
+    }
+
+    setHomes(loadedHomes);
+  };
+
+  const refreshHomes = async () => {
+    if (!realEstate) return;
+    await loadHomes(realEstate);
+  };
 
   const loadBlockChainData = async () => {
+    if (typeof window.ethereum === "undefined") return;
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     setProvider(provider);
 
-    // to tell which network it should be connected to
     const network = await provider.getNetwork();
     console.log("Chain ID:", network.chainId);
+
+    if (!config[network.chainId]) {
+      throw new Error(`No contract config found for chain ${network.chainId}`);
+    }
 
     const realEstate = new ethers.Contract(
       config[network.chainId].realEstate.address,
@@ -36,20 +86,8 @@ function App() {
     );
     console.log(await realEstate.name())
 
-    const totalSupply = await realEstate.totalSupply();
-    const total=totalSupply.toNumber()
-    console.log("Total Supply:", total)
-
-    const homes = [];
-
-    for (var i = 1; i <= total; i++) {
-      const uri = await realEstate.tokenURI(i);
-      const response = await fetch(uri);
-      const metadata = await response.json();
-      homes.push(metadata);
-    }
-    console.log("Homes array before set:", homes)
-    setHomes(homes);
+    setRealEstate(realEstate);
+    await loadHomes(realEstate);
 
     const escrow = new ethers.Contract(
       config[network.chainId].escrow.address,
@@ -58,37 +96,44 @@ function App() {
     );
     setEscrow(escrow);
 
-    // window.ethereum is the bridge between the website and the metamask
-    window.ethereum.on("accountsChanged", async () => {
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      const account = ethers.utils.getAddress(accounts[0]);
-      setAccount(account);
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    const connectedAccount = ethers.utils.getAddress(accounts[0]);
+    setAccount(connectedAccount);
+    await syncSellerRole(escrow, connectedAccount);
+
+    window.ethereum.on("accountsChanged", async (accounts) => {
+      if (!accounts.length) {
+        setAccount(null);
+        setIsSeller(false);
+        return;
+      }
+
+      const selectedAccount = ethers.utils.getAddress(accounts[0]);
+      setAccount(selectedAccount);
+      await syncSellerRole(escrow, selectedAccount);
     });
   };
 
   useEffect(() => {
     loadBlockChainData();
-    // console.log(homes)
   }, []);
 
-  const togglePop=(home)=>{
+  const togglePop = (home) => {
     setHome(home)
-    toggle?setToggle(false) : setToggle(true)
+    toggle ? setToggle(false) : setToggle(true)
   }
 
   if (typeof window.ethereum === 'undefined') {
-  return (
-    <div className='metamask-warning'>
-      <h1>MetaMask Required</h1>
-      <p>Please install MetaMask to use this application.</p>
-      <a href="https://metamask.io/download/" target="_blank" rel="noreferrer">
-        Install MetaMask
-      </a>
-    </div>
-  )
-}
+    return (
+      <div className='metamask-warning'>
+        <h1>MetaMask Required</h1>
+        <p>Please install MetaMask to use this application.</p>
+        <a href="https://metamask.io/download/" target="_blank" rel="noreferrer">
+          Install MetaMask
+        </a>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -97,11 +142,10 @@ function App() {
 
       <div className="cards__section">
         <h3>Homes for You</h3>
-        <hr/>
+        <hr />
 
         <div className="cards">
-
-          {homes.map((home,index)=>(
+          {homes.map((home, index) => (
             <div className="card" key={index} onClick={() => togglePop(home)}>
               <div className="card__image">
                 <img src={home.image} alt="Home/"></img>
@@ -120,8 +164,25 @@ function App() {
         </div>
       </div>
 
+      {isSeller && (
+        <button className="mint-btn" onClick={() => setMintToggle(true)}>
+          + List New Property
+        </button>
+      )}
+
+      {mintToggle && (
+        <MintProperty
+          realEstate={realEstate}
+          escrow={escrow}
+          provider={provider}
+          account={account}
+          onClose={() => setMintToggle(false)}
+          onPropertyAdded={refreshHomes}
+        />
+      )}
+
       {toggle && (
-        <Home home={home} provider={provider} account={account} escrow={escrow} togglePop={togglePop}/>
+        <Home home={home} provider={provider} account={account} escrow={escrow} togglePop={togglePop} />
       )}
     </div>
   );

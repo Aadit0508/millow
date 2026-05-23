@@ -773,3 +773,339 @@ header::after {
   border-color: var(--clr-gold);
   box-shadow: 0 0 32px rgba(201, 168, 76, 0.15);
 }
+
+
+/* ------------------------------------------------------ */
+/* -- MINT PROPERTY MODAL -- */
+
+.mint-btn {
+  display: block;
+  margin: 0 auto 80px;
+  padding: 0 40px;
+  height: 54px;
+  background: transparent;
+  color: var(--clr-gold);
+  border: 1px solid rgba(201, 168, 76, 0.5);
+  border-radius: 2px;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.78em;
+  font-weight: 400;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mint-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.15), transparent);
+  transition: left 0.6s ease;
+}
+
+.mint-btn:hover::before {
+  left: 100%;
+}
+
+.mint-btn:hover {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: var(--clr-gold);
+  color: var(--clr-gold-2);
+  box-shadow: 0 0 24px rgba(201, 168, 76, 0.12), inset 0 0 24px rgba(201, 168, 76, 0.03);
+}
+
+.mint-btn:active {
+  transform: scale(0.98);
+}
+
+/* Overlay */
+.mint-overlay {
+  width: 100vw;
+  height: 100vh;
+  background: rgba(5, 5, 4, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  animation: fadeIn 0.35s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modal box */
+.mint-modal {
+  width: 90%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--clr-obsidian);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: 4px;
+  padding: 48px;
+  position: relative;
+  box-shadow: var(--shadow-xl), var(--shadow-gold);
+  animation: scaleIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Gold top line like home__details */
+.mint-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--clr-gradient-2);
+  opacity: 0.6;
+}
+
+.mint-modal::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mint-modal::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mint-modal::-webkit-scrollbar-thumb {
+  background: rgba(201, 168, 76, 0.3);
+  border-radius: 2px;
+}
+
+.mint-modal::-webkit-scrollbar-thumb:hover {
+  background: var(--clr-gold);
+}
+
+/* Header row */
+.mint-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.mint-modal__header h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2em;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--clr-white);
+  letter-spacing: 1px;
+}
+
+.mint-modal__header h2::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--clr-gradient-2);
+  margin-top: 10px;
+}
+
+/* Close button */
+.mint-modal__close {
+  width: 42px;
+  height: 42px;
+  background: rgba(201, 168, 76, 0.06);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: 2px;
+  color: rgba(245, 240, 232, 0.6);
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.35s ease;
+  flex-shrink: 0;
+}
+
+.mint-modal__close:hover {
+  background: rgba(201, 168, 76, 0.12);
+  border-color: rgba(201, 168, 76, 0.4);
+  color: var(--clr-gold-2);
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.1);
+}
+
+/* Form grid */
+.mint-modal form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.mint-modal form input,
+.mint-modal form textarea {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: 2px;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.85em;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  color: var(--clr-white);
+  transition: all 0.35s ease;
+  box-sizing: border-box;
+}
+
+.mint-modal form input::placeholder,
+.mint-modal form textarea::placeholder {
+  color: var(--clr-grey);
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.mint-modal form input:hover,
+.mint-modal form textarea:hover {
+  border-color: rgba(201, 168, 76, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mint-modal form input:focus,
+.mint-modal form textarea:focus {
+  outline: none;
+  border-color: rgba(201, 168, 76, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.08);
+}
+
+.mint-modal form textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.6;
+}
+
+/* File input */
+.mint-modal form input[type="file"] {
+  padding: 12px 18px;
+  color: var(--clr-grey);
+  cursor: pointer;
+}
+
+.mint-modal form input[type="file"]::-webkit-file-upload-button {
+  background: transparent;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  border-radius: 2px;
+  color: var(--clr-gold);
+  font-family: "Outfit", sans-serif;
+  font-size: 0.75em;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  cursor: pointer;
+  margin-right: 14px;
+  transition: all 0.3s ease;
+}
+
+.mint-modal form input[type="file"]::-webkit-file-upload-button:hover {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: var(--clr-gold);
+}
+
+/* Full-width fields */
+.mint-modal form input[name="name"],
+.mint-modal form input[name="address"],
+.mint-modal form input[name="buyerAddress"],
+.mint-modal form input[name="residenceType"],
+.mint-modal form textarea,
+.mint-modal form input[type="file"],
+.mint-modal form button[type="submit"] {
+  grid-column: 1 / -1;
+}
+
+/* Submit button */
+.mint-modal form button[type="submit"] {
+  margin-top: 8px;
+  height: 54px;
+  background: var(--clr-gradient-2);
+  color: var(--clr-black);
+  border: none;
+  border-radius: 2px;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.8em;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mint-modal form button[type="submit"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.mint-modal form button[type="submit"]:hover::before {
+  left: 100%;
+}
+
+.mint-modal form button[type="submit"]:hover {
+  box-shadow: 0 8px 40px rgba(201, 168, 76, 0.4);
+  transform: translateY(-2px);
+}
+
+.mint-modal form button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+.mint-modal form button[type="submit"]:disabled {
+  background: linear-gradient(135deg, rgba(201, 168, 76, 0.3) 0%, rgba(139, 105, 20, 0.3) 100%);
+  color: rgba(10, 10, 8, 0.5);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Status message */
+.mint-status {
+  margin-top: 20px;
+  padding: 14px 18px;
+  background: rgba(201, 168, 76, 0.05);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  border-radius: 2px;
+  font-size: 0.85em;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  color: rgba(245, 240, 232, 0.75);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .mint-modal {
+    padding: 28px 24px;
+  }
+
+  .mint-modal form {
+    grid-template-columns: 1fr;
+  }
+
+  .mint-modal form input[name="purchasePrice"],
+  .mint-modal form input[name="escrowAmount"],
+  .mint-modal form input[name="bedrooms"],
+  .mint-modal form input[name="bathrooms"],
+  .mint-modal form input[name="sqft"],
+  .mint-modal form input[name="yearBuilt"] {
+    grid-column: 1 / -1;
+  }
+}
