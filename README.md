@@ -32,7 +32,7 @@
 
 A decentralized application (DApp) that revolutionizes real estate transactions by leveraging blockchain technology and NFTs. This platform enables users to buy, sell, and own virtual properties as non-fungible tokens on the Ethereum blockchain.
 
-Built with modern web3 technologies, this DApp provides a seamless user experience for managing digital real estate assets with complete transparency and security.
+Built with modern web3 technologies, this DApp provides a seamless user experience for managing digital real estate assets with complete transparency and security. Deployed on the local hardhat blockchain
 
 ---
 
