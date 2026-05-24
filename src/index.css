@@ -296,14 +296,30 @@ header::after {
   padding: 80px 24px;
 }
 
+.cards__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
 .cards__section h3 {
-  margin: 0 0 48px;
+  margin: 0;
   font-family: "Cormorant Garamond", serif;
   font-size: 2.4em;
   font-weight: 300;
   font-style: italic;
   color: var(--clr-white);
   letter-spacing: 1px;
+}
+
+.cards__header p {
+  margin-top: 12px;
+  color: rgba(245, 240, 232, 0.5);
+  font-size: 0.9em;
+  font-weight: 300;
+  letter-spacing: 0.5px;
 }
 
 .cards__section h3::after {
@@ -315,11 +331,106 @@ header::after {
   margin-top: 16px;
 }
 
+.filters {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, 1fr);
+  gap: 14px;
+  margin: 28px 0 34px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  border-radius: 4px;
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: rgba(245, 240, 232, 0.58);
+  font-size: 0.74em;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.filters input,
+.filters select {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  background: rgba(10, 10, 8, 0.75);
+  color: var(--clr-white);
+  border: 1px solid rgba(201, 168, 76, 0.16);
+  border-radius: 2px;
+  font-family: "Outfit", sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  transition: all 0.35s ease;
+}
+
+.filters input::placeholder {
+  color: var(--clr-grey);
+}
+
+.filters input:focus,
+.filters select:focus {
+  outline: none;
+  border-color: rgba(201, 168, 76, 0.6);
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.08);
+}
+
+.filters__clear {
+  min-width: 150px;
+  height: 44px;
+  padding: 0 20px;
+  background: transparent;
+  color: var(--clr-gold);
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-radius: 2px;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.74em;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.35s ease;
+}
+
+.filters__clear:hover {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: var(--clr-gold);
+  color: var(--clr-gold-2);
+}
+
 .cards {
   display: grid;
   gap: 28px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
   margin-top: 20px;
+}
+
+.cards__empty {
+  margin-top: 36px;
+  padding: 42px 24px;
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+
+.cards__empty h4 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.8em;
+  font-weight: 400;
+  color: var(--clr-white);
+}
+
+.cards__empty p {
+  margin-top: 10px;
+  color: rgba(245, 240, 232, 0.55);
+  font-size: 0.95em;
+  font-weight: 300;
 }
 
 .card {
@@ -703,6 +814,13 @@ header::after {
 
   .cards__section { padding: 48px 20px; }
   .cards__section h3 { font-size: 1.8em; }
+  .cards__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .filters {
+    grid-template-columns: 1fr 1fr;
+  }
 
   .home__details {
     width: 95%;
@@ -716,6 +834,8 @@ header::after {
 @media screen and (max-width: 480px) {
   .nav__brand h1 { font-size: 1.8em; }
   .header__title { font-size: 1.7em; }
+  .filters { grid-template-columns: 1fr; }
+  .filters__clear { width: 100%; }
   .card { height: 380px; }
   .home__buy { width: 100%; }
   .home__contact { width: 100%; }
@@ -780,7 +900,7 @@ header::after {
 
 .mint-btn {
   display: block;
-  margin: 0 auto 80px;
+  margin: 0 auto;
   padding: 0 40px;
   height: 54px;
   background: transparent;
@@ -822,6 +942,37 @@ header::after {
 
 .mint-btn:active {
   transform: scale(0.98);
+}
+
+.mint-btn:disabled {
+  color: rgba(201, 168, 76, 0.45);
+  border-color: rgba(201, 168, 76, 0.2);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.mint-btn:disabled::before {
+  display: none;
+}
+
+.mint-btn:disabled:hover {
+  background: transparent;
+  color: rgba(201, 168, 76, 0.45);
+  border-color: rgba(201, 168, 76, 0.2);
+  box-shadow: none;
+}
+
+.seller-actions {
+  margin: 0 auto 80px;
+  text-align: center;
+}
+
+.seller-actions__hint {
+  margin-top: 14px;
+  color: rgba(245, 240, 232, 0.5);
+  font-size: 0.85em;
+  font-weight: 300;
+  letter-spacing: 0.5px;
 }
 
 /* Overlay */
