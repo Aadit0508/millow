@@ -976,6 +976,12 @@ header::after {
   .filters {
     grid-template-columns: 1fr 1fr;
   }
+  .site-footer {
+    grid-template-columns: 1fr;
+  }
+  .site-footer__meta {
+    text-align: left;
+  }
 
   .home__details {
     width: 95%;
@@ -1130,6 +1136,72 @@ header::after {
   font-size: 0.85em;
   font-weight: 300;
   letter-spacing: 0.5px;
+}
+
+/* ------------------------------------------------------ */
+/* -- FOOTER -- */
+
+.site-footer {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 32px;
+  max-width: 1240px;
+  margin: 42px auto 0;
+  padding: 46px 28px 56px;
+  background: rgba(255, 255, 255, 0.018);
+  border-top: 1px solid rgba(201, 168, 76, 0.22);
+  box-shadow: inset 0 1px 0 rgba(201, 168, 76, 0.06);
+  color: rgba(245, 240, 232, 0.58);
+}
+
+.site-footer__brand h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2.2em;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--clr-gold-2);
+  letter-spacing: 1px;
+}
+
+.site-footer__brand p,
+.site-footer__meta p {
+  margin-top: 10px;
+  max-width: 420px;
+  font-size: 0.9em;
+  font-weight: 300;
+  line-height: 1.7;
+}
+
+.site-footer__links {
+  display: grid;
+  gap: 10px;
+}
+
+.site-footer__links a {
+  color: rgba(245, 240, 232, 0.68);
+  font-size: 0.85em;
+  font-weight: 300;
+  letter-spacing: 0.8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.site-footer__links a:hover {
+  color: var(--clr-gold-2);
+  transform: translateX(4px);
+}
+
+.site-footer__meta {
+  text-align: right;
+}
+
+.site-footer__meta p:first-child {
+  color: var(--clr-white);
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.35em;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 1px;
 }
 
 /* Overlay */

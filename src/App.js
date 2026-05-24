@@ -440,6 +440,29 @@ function App() {
       {toggle && (
         <Home home={home} provider={provider} account={account} escrow={escrow} togglePop={togglePop} />
       )}
+
+      <footer className="site-footer">
+        <div className="site-footer__brand">
+          <h2>Millow</h2>
+          <p>A project showcase for tokenized real estate listings, escrow workflows, and manual property minting.</p>
+        </div>
+
+        <div className="site-footer__links">
+          <a href="mailto:aaditmehtani@gmail.com">aaditmehtani@gmail.com</a>
+          <a href="tel:+919319043103">+91 9319043103</a>
+          <a href="https://www.linkedin.com/in/aadit-mehtani-612a31295/" target="_blank" rel="noreferrer">
+            LinkedIn
+          </a>
+          <a href="https://github.com/Aadit0508/millow" target="_blank" rel="noreferrer">
+            GitHub Repo
+          </a>
+        </div>
+
+        <div className="site-footer__meta">
+          <p>Built by Aadit Mehtani</p>
+          <p>Demo project only. Not for real property transactions.</p>
+        </div>
+      </footer>
     </div>
   );
 }
