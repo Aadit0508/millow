@@ -24,6 +24,8 @@
 - [Environment Variables](#environment-variables)
 - [Usage](#usage)
 - [Manual Property Addition](#manual-property-addition)
+- [User Roles](#user-roles)
+- [Search and Filtering](#search-and-filtering)
 - [Metadata Storage](#metadata-storage)
 - [Testing](#testing)
 - [Project Structure](#project-structure)
@@ -33,7 +35,7 @@
 
 ## Overview
 
-A decentralized application that uses blockchain technology and NFTs to represent real estate properties. Users can browse listed properties, interact with escrow-based purchase flows, and manually add new property listings by minting new NFTs.
+A decentralized application that uses blockchain technology and NFTs to represent real estate properties. Users can browse listed properties, interact with an escrow-based purchase flow, and manually add new property listings by minting new NFTs.
 
 The app combines Solidity smart contracts, a Hardhat local development chain, and a React frontend. Static demo properties are included, while newly added properties are uploaded to IPFS through Pinata and then stored on-chain through each NFT's `tokenURI`.
 
@@ -45,7 +47,11 @@ The app combines Solidity smart contracts, a Hardhat local development chain, an
 - **Escrow Workflow** - Buyer, seller, inspector, and lender approvals are handled by the escrow contract.
 - **Manual Property Addition** - Sellers can upload a property image, generate metadata, mint an NFT, and list it from the UI.
 - **IPFS Metadata Storage** - New property images and metadata are uploaded to Pinata/IPFS.
-- **Interactive React UI** - Browse properties, view details, connect MetaMask, and complete role-based actions.
+- **Search and Filters** - Users can search and filter properties by text, residence type, price range, and bedrooms.
+- **Role-Aware UI** - The connected wallet is labeled as seller, buyer, inspector, lender, or connected user.
+- **Operational Navigation** - Buy, Rent, and Sell navigation actions update the app view and seller flow.
+- **In-App Contact Inquiry** - Property detail modals include a contact form instead of opening an external mail client.
+- **Polished Project Footer** - Footer includes author contact details, LinkedIn, repo link, and project disclaimer.
 - **Hardhat Testing** - Smart contract behavior is covered by a local test suite.
 
 ---
@@ -53,9 +59,14 @@ The app combines Solidity smart contracts, a Hardhat local development chain, an
 ## Recent Changes
 
 - Added seller-only manual listing through the `List New Property` modal.
-- New listings now upload image and metadata to Pinata/IPFS.
-- After minting and listing a property, the frontend refreshes from `totalSupply()` and `tokenURI()` instead of relying only on hardcoded local metadata.
-- Non-seller accounts now see a disabled seller-only listing button with a hint to switch MetaMask accounts.
+- New listings upload image and metadata to Pinata/IPFS.
+- After minting and listing a property, the frontend refreshes from `totalSupply()` and `tokenURI()`.
+- Added real search/filter controls for property discovery.
+- Added operational nav actions for Buy, Rent, and Sell.
+- Added connected user role display in the navigation bar.
+- Added an in-app Contact Agent inquiry form inside the property detail modal.
+- Improved clicked property detail modal with token, residence type, and a compact facts grid.
+- Added a project footer with author/contact links and a demo disclaimer.
 - Fixed lender funding math to use ethers `BigNumber` subtraction.
 - Added `.env.example` documenting the required Pinata JWT.
 
@@ -176,10 +187,11 @@ To add a property:
 3. Start the React app.
 4. Connect MetaMask to the local Hardhat network.
 5. Switch MetaMask to the seller account.
-6. Click `+ List New Property`.
-7. Fill in the property details and buyer wallet address.
-8. Upload a property image.
-9. Submit the form.
+6. Click `Sell` in the navigation.
+7. Click `+ List New Property`.
+8. Fill in the property details and buyer wallet address.
+9. Upload a property image.
+10. Submit the form.
 
 The app will:
 
@@ -190,6 +202,34 @@ The app will:
 5. Approve the escrow contract.
 6. List the new token in escrow.
 7. Refresh the property cards from the blockchain.
+
+---
+
+## User Roles
+
+The navigation bar shows the connected wallet role based on the deployed escrow contract:
+
+- **Seller** - Can list new properties and finalize sales.
+- **Buyer** - Can deposit earnest money and approve the sale.
+- **Inspector** - Can approve inspection.
+- **Lender** - Can approve lending and fund the remaining purchase amount.
+- **Connected** - Wallet is connected but does not match a known escrow role.
+
+MetaMask does not allow apps to silently switch accounts. If you need another role, switch to the relevant account in MetaMask.
+
+---
+
+## Search and Filtering
+
+The property list supports:
+
+- Text search across name, address, description, and residence type
+- Residence type filtering
+- Minimum price
+- Maximum price
+- Minimum bedrooms
+
+Filtering works for both the original local metadata properties and newly minted IPFS properties because all cards are loaded from NFT `tokenURI()` values.
 
 ---
 
@@ -263,7 +303,7 @@ This project is licensed under the MIT License.
 
 <div align="center">
 
-### Built with Web3 Technologies
+### Built by Aadit Mehtani
 
 **[Back to top](#real-estate-nft-dapp)**
 
