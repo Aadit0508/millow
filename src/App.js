@@ -38,6 +38,8 @@ function App() {
   const [home, setHome] = useState(null);
   const [toggle, setToggle] = useState();
   const [isSeller, setIsSeller] = useState(false);
+  const [activeSection, setActiveSection] = useState("buy");
+  const [navMessage, setNavMessage] = useState("");
   const [filters, setFilters] = useState({
     query: "",
     propertyType: "all",
@@ -55,6 +57,8 @@ function App() {
   }, [homes]);
 
   const filteredHomes = useMemo(() => {
+    if (activeSection === "rent") return [];
+
     const searchTerm = filters.query.trim().toLowerCase();
     const minPrice = filters.minPrice === "" ? null : Number(filters.minPrice);
     const maxPrice = filters.maxPrice === "" ? null : Number(filters.maxPrice);
@@ -82,7 +86,7 @@ function App() {
 
       return true;
     });
-  }, [filters, homes]);
+  }, [activeSection, filters, homes]);
 
   const handleFilterChange = (name, value) => {
     setFilters((currentFilters) => ({
@@ -99,6 +103,43 @@ function App() {
       maxPrice: "",
       minBedrooms: "any",
     });
+  };
+
+  const scrollToListings = () => {
+    document.querySelector(".cards__section")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
+  const scrollToSellerActions = () => {
+    document.querySelector(".seller-actions")?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  };
+
+  const handleBuyClick = () => {
+    setActiveSection("buy");
+    setNavMessage("");
+    scrollToListings();
+  };
+
+  const handleRentClick = () => {
+    setActiveSection("rent");
+    setNavMessage("Rental listings are not supported by the current smart contract yet.");
+    scrollToListings();
+  };
+
+  const handleSellClick = async () => {
+    setActiveSection("sell");
+    setNavMessage("");
+
+    if (!isSeller) {
+      setNavMessage("Select the seller account in MetaMask to list a property.");
+    }
+
+    scrollToSellerActions();
   };
 
   const syncSellerRole = async (escrowContract, selectedAccount) => {
@@ -213,13 +254,20 @@ function App() {
 
   return (
     <div>
-      <Navigation account={account} setAccount={setAccount} />
+      <Navigation
+        account={account}
+        setAccount={setAccount}
+        activeSection={activeSection}
+        onBuyClick={handleBuyClick}
+        onRentClick={handleRentClick}
+        onSellClick={handleSellClick}
+      />
       <Search query={filters.query} onQueryChange={(value) => handleFilterChange("query", value)} />
 
       <div className="cards__section">
         <div className="cards__header">
           <div>
-            <h3>Homes for You</h3>
+            <h3>{activeSection === "rent" ? "Homes for Rent" : "Homes for You"}</h3>
             <p>{filteredHomes.length} of {homes.length} properties shown</p>
           </div>
           <button className="filters__clear" onClick={clearFilters} type="button">
@@ -227,6 +275,8 @@ function App() {
           </button>
         </div>
         <hr />
+
+        {navMessage && <div className="nav-message">{navMessage}</div>}
 
         <div className="filters">
           <label>
@@ -303,13 +353,21 @@ function App() {
 
         {filteredHomes.length === 0 && (
           <div className="cards__empty">
-            <h4>No properties match your filters</h4>
-            <p>Try a different search, price range, residence type, or bedroom count.</p>
+            <h4>
+              {activeSection === "rent"
+                ? "Rental listings are not available yet"
+                : "No properties match your filters"}
+            </h4>
+            <p>
+              {activeSection === "rent"
+                ? "The current contracts support property sales. Rental support would need a new contract flow."
+                : "Try a different search, price range, residence type, or bedroom count."}
+            </p>
           </div>
         )}
       </div>
 
-      {account && (
+      {activeSection === "sell" && account && (
         <div className="seller-actions">
           <button
             className="mint-btn"

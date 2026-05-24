@@ -109,9 +109,12 @@ nav:hover {
   gap: 4px;
 }
 
-.nav__links li a {
-  text-decoration: none;
+.nav__link {
+  background: transparent;
+  border: 0;
   color: rgba(245, 240, 232, 0.6);
+  cursor: pointer;
+  font-family: "Outfit", sans-serif;
   font-weight: 300;
   font-size: 0.85em;
   letter-spacing: 2px;
@@ -122,7 +125,7 @@ nav:hover {
   position: relative;
 }
 
-.nav__links li a::after {
+.nav__link::after {
   content: '';
   position: absolute;
   bottom: 4px;
@@ -134,11 +137,13 @@ nav:hover {
   transition: width 0.4s ease;
 }
 
-.nav__links li a:hover::after {
+.nav__link:hover::after,
+.nav__link--active::after {
   width: 60%;
 }
 
-.nav__links li a:hover {
+.nav__link:hover,
+.nav__link--active {
   color: var(--clr-gold-2);
 }
 
@@ -401,6 +406,18 @@ header::after {
   background: rgba(201, 168, 76, 0.08);
   border-color: var(--clr-gold);
   color: var(--clr-gold-2);
+}
+
+.nav-message {
+  margin: 24px 0 0;
+  padding: 14px 18px;
+  background: rgba(201, 168, 76, 0.05);
+  border: 1px solid rgba(201, 168, 76, 0.14);
+  border-radius: 4px;
+  color: rgba(245, 240, 232, 0.7);
+  font-size: 0.9em;
+  font-weight: 300;
+  letter-spacing: 0.5px;
 }
 
 .cards {
