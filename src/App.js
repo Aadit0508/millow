@@ -38,6 +38,7 @@ function App() {
   const [home, setHome] = useState(null);
   const [toggle, setToggle] = useState();
   const [isSeller, setIsSeller] = useState(false);
+  const [userRole, setUserRole] = useState("Not connected");
   const [activeSection, setActiveSection] = useState("buy");
   const [navMessage, setNavMessage] = useState("");
   const [filters, setFilters] = useState({
@@ -142,17 +143,50 @@ function App() {
     scrollToSellerActions();
   };
 
-  const syncSellerRole = async (escrowContract, selectedAccount) => {
+  const syncUserRole = async (escrowContract, selectedAccount, listedHomes = homes) => {
     if (!escrowContract || !selectedAccount) {
       setIsSeller(false);
+      setUserRole("Not connected");
       return;
     }
 
-    const sellerAddress = await escrowContract.seller();
-    setIsSeller(
-      ethers.utils.getAddress(selectedAccount) ===
-        ethers.utils.getAddress(sellerAddress),
-    );
+    const normalizedAccount = ethers.utils.getAddress(selectedAccount);
+    const sellerAddress = ethers.utils.getAddress(await escrowContract.seller());
+    const inspectorAddress = ethers.utils.getAddress(await escrowContract.inspector());
+    const lenderAddress = ethers.utils.getAddress(await escrowContract.lender());
+    const isCurrentSeller = normalizedAccount === sellerAddress;
+
+    setIsSeller(isCurrentSeller);
+
+    if (isCurrentSeller) {
+      setUserRole("Seller");
+      return;
+    }
+
+    if (normalizedAccount === inspectorAddress) {
+      setUserRole("Inspector");
+      return;
+    }
+
+    if (normalizedAccount === lenderAddress) {
+      setUserRole("Lender");
+      return;
+    }
+
+    for (const property of listedHomes) {
+      try {
+        const buyerAddress = ethers.utils.getAddress(await escrowContract.buyer(property.id));
+
+        if (normalizedAccount === buyerAddress) {
+          setUserRole("Buyer");
+          return;
+        }
+      } catch (error) {
+        console.warn(`Unable to resolve buyer for token ${property.id}`, error);
+      }
+    }
+
+    setUserRole("Connected");
   };
 
   const loadHomes = async (realEstateContract) => {
@@ -176,11 +210,16 @@ function App() {
     }
 
     setHomes(loadedHomes);
+    return loadedHomes;
   };
 
   const refreshHomes = async () => {
     if (!realEstate) return;
-    await loadHomes(realEstate);
+    const loadedHomes = await loadHomes(realEstate);
+
+    if (escrow && account) {
+      await syncUserRole(escrow, account, loadedHomes);
+    }
   };
 
   const loadBlockChainData = async () => {
@@ -204,7 +243,7 @@ function App() {
     console.log(await realEstate.name())
 
     setRealEstate(realEstate);
-    await loadHomes(realEstate);
+    const loadedHomes = await loadHomes(realEstate);
 
     const escrow = new ethers.Contract(
       config[network.chainId].escrow.address,
@@ -216,18 +255,19 @@ function App() {
     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
     const connectedAccount = ethers.utils.getAddress(accounts[0]);
     setAccount(connectedAccount);
-    await syncSellerRole(escrow, connectedAccount);
+    await syncUserRole(escrow, connectedAccount, loadedHomes);
 
     window.ethereum.on("accountsChanged", async (accounts) => {
       if (!accounts.length) {
         setAccount(null);
         setIsSeller(false);
+        setUserRole("Not connected");
         return;
       }
 
       const selectedAccount = ethers.utils.getAddress(accounts[0]);
       setAccount(selectedAccount);
-      await syncSellerRole(escrow, selectedAccount);
+      await syncUserRole(escrow, selectedAccount, loadedHomes);
     });
   };
 
@@ -257,6 +297,7 @@ function App() {
       <Navigation
         account={account}
         setAccount={setAccount}
+        userRole={userRole}
         activeSection={activeSection}
         onBuyClick={handleBuyClick}
         onRentClick={handleRentClick}

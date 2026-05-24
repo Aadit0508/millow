@@ -12,8 +12,30 @@ const Home = ({ home, provider, account, escrow, togglePop }) => {
   const [lender, setLender] = useState(null);
   const [inspector, setInspector] = useState(null);
   const [seller, setSeller] = useState(null);
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [contactStatus, setContactStatus] = useState("");
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    contact: "",
+    message: "",
+  });
 
   const [owner, setOwner] = useState(null);
+
+  const getAttributeValue = (traitType) => {
+    const attribute = home.attributes.find(
+      (item) => item.trait_type.toLowerCase() === traitType.toLowerCase(),
+    );
+
+    return attribute?.value;
+  };
+
+  const price = getAttributeValue("Purchase Price");
+  const residenceType = getAttributeValue("Type of Residence");
+  const bedrooms = getAttributeValue("Bed Rooms");
+  const bathrooms = getAttributeValue("Bathrooms");
+  const squareFeet = getAttributeValue("Square Feet");
+  const yearBuilt = getAttributeValue("Year Built");
 
   const fetchDetails = async () => {
     // -- Buyer
@@ -125,6 +147,41 @@ const Home = ({ home, provider, account, escrow, togglePop }) => {
     setHasSold(true); // Update UI
   };
 
+  const contactHandler = () => {
+    setShowContactForm((isOpen) => !isOpen);
+    setContactStatus("");
+    setContactForm((currentForm) => ({
+      ...currentForm,
+      message:
+        currentForm.message ||
+        `I am interested in ${home.name} at ${home.address}. Please share the next steps.`,
+    }));
+  };
+
+  const contactChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setContactForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
+  };
+
+  const contactSubmitHandler = (e) => {
+    e.preventDefault();
+
+    const inquiry = {
+      ...contactForm,
+      propertyId: home.id,
+      propertyName: home.name,
+      wallet: account,
+      createdAt: new Date().toISOString(),
+    };
+
+    console.log("Property inquiry submitted", inquiry);
+    setContactStatus("Inquiry saved. An agent can follow up with the details you entered.");
+    setContactForm({ name: "", contact: "", message: "" });
+  };
+
   useEffect(() => {
     fetchDetails();
     fetchOwner();
@@ -137,15 +194,47 @@ const Home = ({ home, provider, account, escrow, togglePop }) => {
           <img src={home.image} alt="Home" />
         </div>
         <div className="home__overview">
+          <div className="home__meta">
+            <span>Token #{home.id}</span>
+            <span>{residenceType}</span>
+          </div>
+
           <h1>{home.name}</h1>
           <p>
-            <strong>{home.attributes[2].value}</strong> bds |
-            <strong>{home.attributes[3].value}</strong> ba |
-            <strong>{home.attributes[4].value}</strong> sqft
+            <strong>{bedrooms}</strong> bds |
+            <strong>{bathrooms}</strong> ba |
+            <strong>{squareFeet}</strong> sqft
           </p>
           <p>{home.address}</p>
 
-          <h2>{home.attributes[0].value} ETH</h2>
+          <h2>{price} ETH</h2>
+
+          <div className="home__facts-grid">
+            <div>
+              <span>Residence</span>
+              <strong>{residenceType}</strong>
+            </div>
+            <div>
+              <span>Bedrooms</span>
+              <strong>{bedrooms}</strong>
+            </div>
+            <div>
+              <span>Bathrooms</span>
+              <strong>{bathrooms}</strong>
+            </div>
+            <div>
+              <span>Square Feet</span>
+              <strong>{squareFeet}</strong>
+            </div>
+            <div>
+              <span>Year Built</span>
+              <strong>{yearBuilt}</strong>
+            </div>
+            <div>
+              <span>Status</span>
+              <strong>{owner ? "Sold" : "Listed"}</strong>
+            </div>
+          </div>
 
           {owner ? (
             <div className="home__owned">
@@ -187,7 +276,38 @@ const Home = ({ home, provider, account, escrow, togglePop }) => {
                 </button>
               )}
 
-              <button className="home__contact">Contact agent</button>
+              <button className="home__contact" onClick={contactHandler}>
+                {showContactForm ? "Hide contact" : "Contact agent"}
+              </button>
+
+              {showContactForm && (
+                <form className="home__contact-form" onSubmit={contactSubmitHandler}>
+                  <input
+                    name="name"
+                    placeholder="Your name"
+                    value={contactForm.name}
+                    onChange={contactChangeHandler}
+                    required
+                  />
+                  <input
+                    name="contact"
+                    placeholder="Email or phone"
+                    value={contactForm.contact}
+                    onChange={contactChangeHandler}
+                    required
+                  />
+                  <textarea
+                    name="message"
+                    placeholder="Message"
+                    value={contactForm.message}
+                    onChange={contactChangeHandler}
+                    required
+                  />
+                  <button type="submit">Send inquiry</button>
+                </form>
+              )}
+
+              {contactStatus && <p className="home__contact-status">{contactStatus}</p>}
             </div>
           )}
 

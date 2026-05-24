@@ -1,7 +1,15 @@
 import { ethers } from 'ethers';
 import logo from '../assets/logo.svg';
 
-const Navigation = ({ account, setAccount, activeSection, onBuyClick, onRentClick, onSellClick }) => {
+const Navigation = ({
+    account,
+    setAccount,
+    userRole,
+    activeSection,
+    onBuyClick,
+    onRentClick,
+    onSellClick,
+}) => {
     const connectHandler = async () => {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const account = ethers.utils.getAddress(accounts[0])
@@ -45,13 +53,16 @@ const Navigation = ({ account, setAccount, activeSection, onBuyClick, onRentClic
                 <h1>Millow</h1>
             </div>
 
-            {account ? ( //ternary operator based on if the account exists or not
-                <button
-                    type="button"
-                    className='nav__connect'
-                >
-                    {account.slice(0, 6) + '...' + account.slice(38, 42)}
-                </button>
+            {account ? (
+                <div className="nav__account">
+                    <span className="nav__role">{userRole}</span>
+                    <button
+                        type="button"
+                        className='nav__connect'
+                    >
+                        {account.slice(0, 6) + '...' + account.slice(38, 42)}
+                    </button>
+                </div>
             ) : (
                 <button
                     type="button"

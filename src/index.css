@@ -192,6 +192,27 @@ nav:hover {
   transform: scale(0.98);
 }
 
+.nav__account {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav__role {
+  min-width: 82px;
+  padding: 8px 12px;
+  color: var(--clr-gold-2);
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  border-radius: 2px;
+  font-size: 0.72em;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 /* ------------------------------------------------------ */
 /* -- HEADER -- */
 
@@ -720,6 +741,25 @@ header::after {
   letter-spacing: 0.5px;
 }
 
+.home__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.home__meta span {
+  padding: 7px 11px;
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  border-radius: 2px;
+  color: var(--clr-gold-2);
+  font-size: 0.7em;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
 .home__overview h2 {
   font-family: "Cormorant Garamond", serif;
   font-size: 1.4em;
@@ -733,6 +773,35 @@ header::after {
   height: 1px;
   background: linear-gradient(90deg, rgba(201, 168, 76, 0.5) 0%, transparent 100%);
   margin: 28px 0;
+}
+
+.home__facts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 22px 0 8px;
+}
+
+.home__facts-grid div {
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  border-radius: 4px;
+}
+
+.home__facts-grid span {
+  display: block;
+  color: rgba(245, 240, 232, 0.45);
+  font-size: 0.68em;
+  letter-spacing: 1.8px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.home__facts-grid strong {
+  color: var(--clr-white);
+  font-size: 1em;
+  font-weight: 500;
 }
 
 .home__overview ul {
@@ -815,6 +884,69 @@ header::after {
   padding: 0 32px;
 }
 
+.home__contact-status {
+  margin-top: -8px;
+  color: rgba(245, 240, 232, 0.5);
+  font-size: 0.85em;
+  font-weight: 300;
+  letter-spacing: 0.4px;
+}
+
+.home__contact-form {
+  display: grid;
+  gap: 10px;
+  margin: 4px 0 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: 4px;
+}
+
+.home__contact-form input,
+.home__contact-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(10, 10, 8, 0.75);
+  border: 1px solid rgba(201, 168, 76, 0.14);
+  border-radius: 2px;
+  color: var(--clr-white);
+  font-family: "Outfit", sans-serif;
+  font-size: 0.9em;
+  font-weight: 300;
+}
+
+.home__contact-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.home__contact-form input:focus,
+.home__contact-form textarea:focus {
+  outline: none;
+  border-color: rgba(201, 168, 76, 0.55);
+}
+
+.home__contact-form button {
+  height: 44px;
+  background: transparent;
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  border-radius: 2px;
+  color: var(--clr-gold);
+  cursor: pointer;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.78em;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all 0.35s ease;
+}
+
+.home__contact-form button:hover {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: var(--clr-gold);
+  color: var(--clr-gold-2);
+}
+
 /* ------------------------------------------------------ */
 /* -- RESPONSIVE -- */
 
@@ -825,6 +957,12 @@ header::after {
   }
 
   .nav__links { display: none; }
+  .nav__account {
+    justify-content: flex-end;
+  }
+  .nav__role {
+    display: none;
+  }
 
   .header__title { font-size: 2.4em; }
   .header__search { min-width: 80%; }
@@ -846,6 +984,7 @@ header::after {
   }
 
   .home__overview { margin: 0; }
+  .home__facts-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media screen and (max-width: 480px) {
@@ -854,6 +993,7 @@ header::after {
   .filters { grid-template-columns: 1fr; }
   .filters__clear { width: 100%; }
   .card { height: 380px; }
+  .home__facts-grid { grid-template-columns: 1fr; }
   .home__buy { width: 100%; }
   .home__contact { width: 100%; }
 }
